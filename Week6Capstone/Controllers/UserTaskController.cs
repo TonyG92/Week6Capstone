@@ -46,22 +46,32 @@ namespace Week6Capstone.Controllers
 
         public ActionResult UserPage(User loginUser)
         {
+            if (Session["CurrentUser"] != null)
+            {
+                return View();
+            }
+
             List<User> userList = ORM.Users.ToList();
 
-            foreach(User user in userList)
+            User user = userList.Find(u => u.Email == loginUser.Email);
+
+            if (user != null)
             {
-                if (loginUser.Email == user.Email && loginUser.Password == user.Password)
+                if (loginUser.Password == user.Password)
                 {
                     loginUser.Id = user.Id;
                     Session["CurrentUser"] = loginUser;
+                    return View();
                 }
                 else
-                {       
+                {
                     ViewBag.ErrorMessage = "Email or Password was incorrect...";
                     return RedirectToAction("Login");
                 }
             }
-            return View();
+
+            ViewBag.ErrorMessage = "There are no users with this email address..";
+            return RedirectToAction("Login");
         }
 
         public ActionResult TaskList()
